@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+pytest-cache-files-*/
+.ruff_cache/
+.venv/
+.env
+dataset/raw/
+dataset/processed/
+models/*
+!models/.gitkeep
+outputs/
+dist/
+/Celx-colab*.zip
+wandb/
+mlruns/
+*.gguf
+
+# Nested empty clone placeholder
+celx-treino-modelo/

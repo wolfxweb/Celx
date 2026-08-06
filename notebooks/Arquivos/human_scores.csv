@@ -1,0 +1,9 @@
+﻿model,id,language,structure_score,elapsed_seconds,fidelity_1_5,coverage_1_5,clarity_1_5,business_rules_1_5,human_structure_1_5,critical_error,notes
+mistralai/Ministral-3-3B-Instruct-2512-BF16,py-001,python,0/6,28.17,,,,,,,
+mistralai/Ministral-3-3B-Instruct-2512-BF16,php-001,php,0/6,27.819,,,,,,,
+mistralai/Ministral-3-3B-Instruct-2512-BF16,js-001,javascript,6/6,33.815,,,,,,,
+mistralai/Ministral-3-3B-Instruct-2512-BF16,sql-001,sql,6/6,39.384,,,,,,,
+Qwen/Qwen3-1.7B,py-001,python,6/6,16.546,,,,,,,
+Qwen/Qwen3-1.7B,php-001,php,3/6,18.826,,,,,,,
+Qwen/Qwen3-1.7B,js-001,javascript,6/6,16.436,,,,,,,
+Qwen/Qwen3-1.7B,sql-001,sql,6/6,22.793,,,,,,,

@@ -1,0 +1,23 @@
+candidates:
+  - id: Qwen/Qwen3-1.7B
+    short_name: qwen3-1.7b
+    parameters_billions: 1.7
+    license: apache-2.0
+    gated: false
+    enabled: true
+    notes: Suporta modo sem raciocínio explícito e contexto de 32k.
+
+  - id: mistralai/Ministral-3-3B-Instruct-2512-BF16
+    short_name: ministral3-3b
+    parameters_billions: 3.0
+    license: apache-2.0
+    gated: false
+    enabled: true
+    notes: Maior candidato; testar somente se couber no orçamento do Colab.
+
+benchmark:
+  dataset: dataset/benchmark/expanded_100.jsonl
+  output_dir: evaluation/results/benchmark_100
+  samples_per_language: 100
+  max_new_tokens: 700
+  temperature: 0.0
