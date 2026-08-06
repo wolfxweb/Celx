@@ -27,7 +27,7 @@ publicação do adapter.
 4. Processar os casos sempre na mesma ordem.
 5. Preservar resposta, tempo e quantidade de tokens.
 6. Avaliar as respostas sem identificar o modelo ao avaliador quando possível.
-7. Aplicar a rubrica em `evaluation/RUBRICA.md`.
+7. Aplicar a rubrica em `docs/RUBRICA.md`.
 
 ## Casos mínimos
 
@@ -63,7 +63,7 @@ python scripts/run_baseline.py
 Criar a planilha de avaliação:
 
 ```bash
-python evaluation/score_baseline.py
+python scripts/score_baseline.py
 ```
 
 ## Pontuação de decisão

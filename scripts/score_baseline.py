@@ -19,8 +19,8 @@ REQUIRED_SECTIONS = (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Cria planilha de avaliação cega do baseline.")
-    parser.add_argument("--results", type=Path, default=Path("evaluation/results/baseline"))
-    parser.add_argument("--output", type=Path, default=Path("evaluation/results/human_scores.csv"))
+    parser.add_argument("--results", type=Path, default=Path("outputs/baseline"))
+    parser.add_argument("--output", type=Path, default=Path("outputs/baseline/human_scores.csv"))
     return parser.parse_args()
 
 

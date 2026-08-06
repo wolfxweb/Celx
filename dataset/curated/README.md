@@ -12,3 +12,6 @@ O campo `documentation_pt` precisa conter todas as seções do contrato document
 originais do CodeXGLUE não devem ser copiadas diretamente para este campo sem tradução,
 reestruturação, análise de fidelidade e revisão.
 
+Modelos de contrato e exemplo estão em `templates/`. O checklist de revisão está em
+`docs/CHECKLIST_CURADORIA.md`.
+

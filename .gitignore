@@ -9,7 +9,8 @@ dataset/raw/
 dataset/processed/
 models/*
 !models/.gitkeep
-outputs/
+outputs/*
+!outputs/.gitkeep
 dist/
 /Celx-colab*.zip
 wandb/

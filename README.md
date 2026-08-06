@@ -54,17 +54,14 @@ Valor total no formato `BigDecimal`.
 ```text
 .
 ├── configs/       # parâmetros de dados, modelo e treinamento
-├── dataset/       # dados locais (não versionados)
-├── docs/          # escopo, decisões e cronograma
-├── evaluation/    # avaliação automática e humana
-├── inference/     # uso do modelo-base ou adapter
+├── dataset/       # exemplos, benchmark, curadoria e dados processados
+├── docs/          # escopo, decisões, rubrica e relatórios
 ├── legacy_doc/    # componentes Python reutilizáveis
-├── models/        # adapters e modelos locais (não versionados)
-├── notebooks/     # notebooks reproduzíveis no Colab
-├── presentation/  # apresentação final
-├── scripts/       # aquisição e preparação dos dados
-├── tests/         # testes rápidos sem GPU
-└── training/      # treinamento LoRA/QLoRA
+├── models/        # adapters locais (não versionados)
+├── notebooks/     # fluxo 01–05 (Colab / Kaggle / RunPod)
+├── outputs/       # resultados de benchmark e análise (não versionados)
+├── scripts/       # dados, baseline, treino, avaliação e inferência
+└── tests/         # testes rápidos sem GPU
 ```
 
 ## Requisitos
@@ -117,7 +114,7 @@ Os dados preparados serão gravados em `dataset/processed/` junto com um manifes
 Execute em uma sessão com GPU CUDA:
 
 ```bash
-python training/train_qlora.py --config configs/default.yaml
+python scripts/train_qlora.py --config configs/default.yaml
 ```
 
 ### 4. Documentar uma função
@@ -125,7 +122,7 @@ python training/train_qlora.py --config configs/default.yaml
 Com o modelo-base:
 
 ```bash
-python inference/document_code.py \
+python scripts/document_code.py \
   --file dataset/examples/calcula_total.py \
   --language python
 ```
@@ -133,7 +130,7 @@ python inference/document_code.py \
 Com um adapter treinado:
 
 ```bash
-python inference/document_code.py \
+python scripts/document_code.py \
   --file dataset/examples/calcula_total.py \
   --language python \
   --adapter models/qwen3-legacy-doc-qlora

@@ -16,10 +16,10 @@ e a planilha de avaliação humana original não foi preenchida.
 
 ## 2. Artefatos analisados
 
-- `notebooks/qwen3-1.7b.jsonl`;
-- `notebooks/ministral3-3b.jsonl`;
-- `notebooks/model_comparison.csv`;
-- `notebooks/human_scores.csv`.
+- `dataset/benchmark/results/qwen3-1.7b.jsonl`;
+- `dataset/benchmark/results/ministral3-3b.jsonl`;
+- `dataset/benchmark/results/model_comparison.csv`;
+- `dataset/benchmark/results/human_scores.csv`.
 
 Cada modelo recebeu exatamente os mesmos quatro códigos e o mesmo contrato documental.
 

@@ -17,7 +17,7 @@ semântica, preferencialmente humana, sobre uma amostra estratificada.
 
 ## 2. Fonte e escopo
 
-Arquivo analisado: `notebooks/model_comparison (2).csv`.
+Arquivo analisado: `dataset/benchmark/results/model_comparison_400.csv`.
 
 | Item | Valor |
 |---|---|

@@ -17,6 +17,6 @@ Ao final, salve uma versão para preservar os outputs.
 ## Continuação
 
 Para continuar uma execução em outra sessão, adicione o ZIP ou JSONL da execução anterior como
-Input e copie o resultado correspondente para `evaluation/results/benchmark_100` antes de rodar
+Input e copie o resultado correspondente para `outputs/benchmark_100` antes de rodar
 o modelo. O executor ignora IDs já concluídos.
 

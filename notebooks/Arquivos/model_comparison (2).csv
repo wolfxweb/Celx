@@ -1,3 +1,0 @@
-﻿model,examples,languages,structure_percent,average_seconds,average_generated_tokens
-mistralai/Ministral-3-3B-Instruct-2512-BF16,400,"javascript,php,python,sql",64.42,39.043,680.3
-Qwen/Qwen3-1.7B,400,"javascript,php,python,sql",96.08,26.397,424.6

@@ -20,9 +20,9 @@ REQUIRED_SECTIONS = (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Resume resultados do benchmark por modelo.")
-    parser.add_argument("--results", type=Path, default=Path("evaluation/results/baseline"))
+    parser.add_argument("--results", type=Path, default=Path("outputs/baseline"))
     parser.add_argument(
-        "--output", type=Path, default=Path("evaluation/results/model_comparison.csv")
+        "--output", type=Path, default=Path("outputs/baseline/model_comparison.csv")
     )
     return parser.parse_args()
 

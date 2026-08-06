@@ -15,7 +15,7 @@ from legacy_doc.config import load_config
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analisa o CodeXGLUE normalizado.")
     parser.add_argument("--config", default="configs/default.yaml")
-    parser.add_argument("--output", type=Path, default=Path("evaluation/dataset_analysis"))
+    parser.add_argument("--output", type=Path, default=Path("outputs/dataset_analysis"))
     return parser.parse_args()
 
 

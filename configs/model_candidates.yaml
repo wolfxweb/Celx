@@ -17,7 +17,7 @@ candidates:
 
 benchmark:
   dataset: dataset/benchmark/expanded_100.jsonl
-  output_dir: evaluation/results/benchmark_100
+  output_dir: outputs/benchmark_100
   samples_per_language: 100
   max_new_tokens: 700
   temperature: 0.0

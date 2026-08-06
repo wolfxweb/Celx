@@ -20,13 +20,10 @@ $included = @(
     "dataset/examples",
     "dataset/sql/README.md",
     "docs",
-    "evaluation",
-    "inference",
     "legacy_doc",
     "notebooks",
     "scripts",
-    "tests",
-    "training"
+    "tests"
 )
 
 $existingItems = @($included | Where-Object {
