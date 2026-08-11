@@ -22,7 +22,8 @@ de negócio sustentadas pelo código.
 - afirmar requisitos que não estejam sustentados pelo código;
 - analisar uma aplicação inteira em uma única entrada;
 - substituir revisão técnica ou conhecimento de especialistas do negócio;
-- treinar automaticamente na máquina local.
+- QLoRA 4-bit com bitsandbytes neste Mac (usar LoRA/MPS via `train_lora.py`);
+- editar `arquivos/` como código ativo (é histórico congelado do reset).
 
 ## Formato mínimo da documentação
 

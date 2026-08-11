@@ -5,7 +5,7 @@ candidates:
     license: apache-2.0
     gated: false
     enabled: true
-    notes: Suporta modo sem raciocínio explícito e contexto de 32k.
+    notes: Raciocínio (thinking) sempre ativo; contexto de 32k.
 
   - id: mistralai/Ministral-3-3B-Instruct-2512-BF16
     short_name: ministral3-3b
@@ -19,5 +19,6 @@ benchmark:
   dataset: dataset/benchmark/expanded_100.jsonl
   output_dir: outputs/benchmark_100
   samples_per_language: 100
-  max_new_tokens: 700
+  max_new_tokens: 1600
   temperature: 0.0
+  enable_thinking: true

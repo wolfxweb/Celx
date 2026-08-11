@@ -16,12 +16,18 @@ LANGUAGES = ("python", "php", "javascript", "sql")
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Cria filas balanceadas para curadoria humana.")
-    parser.add_argument("--config", default="configs/default.yaml")
-    parser.add_argument("--output-dir", type=Path, default=Path("dataset/curated/queues"))
-    parser.add_argument("--train-per-language", type=int, default=500)
-    parser.add_argument("--validation-per-language", type=int, default=50)
-    parser.add_argument("--test-per-language", type=int, default=50)
-    parser.add_argument("--benchmark", type=Path, default=Path("dataset/benchmark/expanded_100.jsonl"))
+    parser.add_argument("--config", default="configs/curadoria.yaml")
+    parser.add_argument(
+        "--mode",
+        choices=("piloto", "meta_v1", "escala_2k"),
+        default=None,
+        help="Volumes de curadoria (default: curation.mode no YAML).",
+    )
+    parser.add_argument("--output-dir", type=Path, default=None)
+    parser.add_argument("--train-per-language", type=int, default=None)
+    parser.add_argument("--validation-per-language", type=int, default=None)
+    parser.add_argument("--test-per-language", type=int, default=None)
+    parser.add_argument("--benchmark", type=Path, default=None)
     return parser.parse_args()
 
 
@@ -69,20 +75,52 @@ def take_unique(
     raise ValueError(f"Somente {len(selected)} registros únicos disponíveis; esperado: {limit}")
 
 
+def resolve_counts(args: argparse.Namespace, cfg: dict[str, Any]) -> tuple[str, dict[str, int], Path, Path]:
+    curation = cfg.get("curation") or {}
+    mode = args.mode or curation.get("mode") or "piloto"
+    preset = dict(curation.get(mode) or {})
+    counts = {
+        "train": args.train_per_language
+        if args.train_per_language is not None
+        else int(preset.get("train_per_language", 50)),
+        "validation": args.validation_per_language
+        if args.validation_per_language is not None
+        else int(preset.get("validation_per_language", 10)),
+        "test": args.test_per_language
+        if args.test_per_language is not None
+        else int(preset.get("test_per_language", 10)),
+    }
+    output_dir = args.output_dir or Path(curation.get("queue_dir", "dataset/curated/queues"))
+    benchmark = args.benchmark or Path(
+        curation.get("benchmark", "dataset/benchmark/expanded_100.jsonl")
+    )
+    return mode, counts, output_dir, benchmark
+
+
+def resolve_normalized_dir(cfg: dict[str, Any]) -> Path:
+    preferred = Path(cfg["data"]["normalized_dir"])
+    if (preferred / "train").exists():
+        return preferred
+    fallback = Path("dataset/processed/codexglue")
+    if (fallback / "train").exists():
+        print(f"Aviso: {preferred} ausente — usando {fallback}")
+        return fallback
+    raise FileNotFoundError(
+        f"Normalized dir não encontrado: {preferred} (nem fallback {fallback}). "
+        "Rode prepare_dataset.py / prepare_sql_spider.py antes."
+    )
+
+
 def main() -> None:
     args = parse_args()
     cfg = load_config(args.config)
     seed = cfg["project"]["seed"]
-    normalized_dir = Path(cfg["data"]["normalized_dir"])
-    counts = {
-        "train": args.train_per_language,
-        "validation": args.validation_per_language,
-        "test": args.test_per_language,
-    }
+    mode, counts, output_dir, benchmark = resolve_counts(args, cfg)
+    normalized_dir = resolve_normalized_dir(cfg)
 
     excluded = {
         fingerprint(row["language"], row["code"])
-        for row in read_jsonl(args.benchmark)
+        for row in read_jsonl(benchmark)
         if row.get("language") and row.get("code")
     }
     benchmark_exclusions = len(excluded)
@@ -90,7 +128,13 @@ def main() -> None:
 
     for split in ("test", "validation", "train"):
         dataset = load_from_disk(str(normalized_dir / split))
+        available_langs = set(dataset["language"])
         for language in LANGUAGES[:-1]:
+            if language not in available_langs:
+                raise ValueError(
+                    f"{normalized_dir}/{split} sem linguagem '{language}'. "
+                    "Reprepare o pool normalizado."
+                )
             subset = dataset.filter(lambda row, lang=language: row["language"] == lang).shuffle(
                 seed=seed
             )
@@ -106,6 +150,7 @@ def main() -> None:
             ]
             output[split].extend(take_unique(candidates, counts[split], excluded))
 
+    print("Baixando/carregando xlangai/spider para SQL na fila...")
     sql = load_dataset("xlangai/spider", split="train").shuffle(seed=seed)
     sql_candidates = [
         queue_record("sql", row["query"], row["question"], "xlangai/spider", "")
@@ -129,16 +174,25 @@ def main() -> None:
             raise ValueError(f"SQL/{split}: {len(selected)} disponíveis; esperado: {needed}")
         output[split].extend(selected)
 
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    total = sum(len(rows) for rows in output.values())
     manifest: dict[str, Any] = {
         "status": "pending_human_review",
+        "language": "pt-BR",
+        "mode": mode,
         "seed": seed,
+        "normalized_dir": str(normalized_dir),
         "benchmark_fingerprints_excluded": benchmark_exclusions,
+        "totals": {
+            "rows": total,
+            "per_language_target": counts,
+            "languages": list(LANGUAGES),
+        },
         "splits": {},
     }
     for split, rows in output.items():
         rows.sort(key=lambda row: (row["language"], row["id"]))
-        path = args.output_dir / f"{split}_review_queue.jsonl"
+        path = output_dir / f"{split}_review_queue.jsonl"
         with path.open("w", encoding="utf-8") as stream:
             for row in rows:
                 stream.write(json.dumps(row, ensure_ascii=False) + "\n")
@@ -149,7 +203,7 @@ def main() -> None:
             "per_language": per_language,
         }
 
-    (args.output_dir / "manifest.json").write_text(
+    (output_dir / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     print(json.dumps(manifest, ensure_ascii=False, indent=2))

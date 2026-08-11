@@ -1,163 +1,84 @@
-# Fine-Tuning para documentação de software legado
+# Celx — documentação de software legado
 
-Projeto experimental para especializar um LLM na geração de documentação técnica em português
-a partir de código legado em PHP, Python, JavaScript e SQL.
+Fine-tuning experimental de um LLM para gerar documentação técnica em português a partir de
+código legado (PHP, Python, JavaScript e SQL).
 
-O foco é explicar **como o código existente funciona** e registrar regras de negócio observáveis.
-O modelo deve declarar incertezas em vez de inventar requisitos.
+O modelo deve explicar o comportamento observável e declarar incertezas — sem inventar regras.
 
-## Estado do projeto
+## Estado
 
-O projeto está no **Marco 1 — Fundação**. A estrutura, o formato documental e os primeiros
-pipelines foram criados. O dataset ainda não foi baixado e nenhum treinamento foi executado.
+Projeto **reiniciado**. Snapshot anterior em [`arquivos/`](arquivos/).
 
-Consulte o [cronograma](docs/CRONOGRAMA.md), o [escopo](docs/ESCOPO.md) e o
-[protocolo de seleção do modelo](docs/SELECAO_MODELO.md).
-
-## Saída esperada
-
-```markdown
-## Método ou função
-
-Calcula o valor total de um pedido.
-
-### Objetivo
-
-Somar os valores dos itens pertencentes ao pedido.
-
-### Parâmetros
-
-- `pedido`: objeto que contém os itens processados.
-
-### Retorno
-
-Valor total no formato `BigDecimal`.
-
-### Funcionamento
-
-1. Inicializa o total com zero.
-2. Percorre os itens do pedido.
-3. Soma o valor de cada item.
-4. Retorna o total.
-
-### Regras de negócio identificadas
-
-- O total corresponde à soma dos valores dos itens.
-
-### Pontos não determinados
-
-- O comportamento para pedido ou valores nulos não está definido.
-```
+Ciclo atual: **Fase 2 — Benchmark** para escolher o modelo-base.
+Plano completo: [`docs/PLANO.md`](docs/PLANO.md).
 
 ## Estrutura
 
 ```text
 .
-├── configs/       # parâmetros de dados, modelo e treinamento
-├── dataset/       # exemplos, benchmark, curadoria e dados processados
-├── docs/          # escopo, decisões, rubrica e relatórios
-├── legacy_doc/    # componentes Python reutilizáveis
-├── models/        # adapters locais (não versionados)
-├── notebooks/     # fluxo 01–05 (Colab / Kaggle / RunPod)
-├── outputs/       # resultados de benchmark e análise (não versionados)
-├── scripts/       # dados, baseline, treino, avaliação e inferência
-└── tests/         # testes rápidos sem GPU
+├── arquivos/      # histórico congelado (não editar)
+├── configs/       # modelo, dados e treinamento
+├── dataset/       # exemplos, benchmark e curadoria
+├── docs/          # plano, escopo, rubrica, decisões
+├── legacy_doc/    # prompts e config Python
+├── models/        # adapters (gitignored)
+├── notebooks/     # 01–04 (benchmark → pipeline completo)
+├── outputs/       # resultados de execução (gitignored)
+├── scripts/       # CLI: dados, baseline, treino, inferência
+└── tests/
 ```
 
 ## Requisitos
 
-- Python 3.10 ou superior;
-- GPU NVIDIA/CUDA para QLoRA;
-- Google Colab é o ambiente previsto para treinamento;
-- conta Hugging Face apenas para publicação ou modelos restritos.
+- Python 3.10+
+- GPU NVIDIA/CUDA para benchmark completo e QLoRA (Kaggle, Colab ou RunPod)
+- Este Mac prepara dados e empacota o projeto; não treina
 
 ## Instalação local
 
 ```bash
 python -m venv .venv
+source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 python -m pip install -e .
 ```
 
-No Windows PowerShell, ative o ambiente com:
+## Próximo passo
 
-```powershell
-.venv\Scripts\Activate.ps1
-```
+1. Kernel `.venv` → `notebooks/01_benchmark.ipynb` (opcional)
+2. **Pipeline completo** → `notebooks/04_pipeline_completo.ipynb`  
+   (CodeXGLUE + SQL → treino → eval → export)
+3. Alternativas: `03_treino_real.ipynb` (só CodeXGLUE) ou `02` (smoke)
 
-## Fluxo de execução
+### Usar o modelo no editor
 
-Para executar a seleção do modelo no Google Colab, abra
-`notebooks/01_baseline_colab.ipynb`, ative uma GPU T4 e siga as células. Enquanto o projeto não
-estiver publicado em um repositório remoto, o notebook recebe um arquivo ZIP da pasta local.
-
-### 1. Validar a fundação
-
-```bash
-python -m pytest
-python -m ruff check .
-```
-
-### 2. Preparar o CodeXGLUE
-
-Este comando baixa dados e o tokenizer do Hugging Face:
+| Editor | Como |
+|---|---|
+| **VS Code** | Extensão **Continue** + Ollama local (`qwen2.5:1.5b-celx`) e/ou API Celx |
+| **Cursor** | `localhost` é bloqueado; use modelos cloud do Cursor, ou VS Code para local |
+| **Terminal** | `document_code.py` com o adapter |
 
 ```bash
-python scripts/prepare_dataset.py --config configs/default.yaml
+# App Ollama deve estar aberto
+# API do adapter Celx (para Continue no VS Code):
+bash scripts/start_celx_api.sh
 ```
 
-Os dados preparados serão gravados em `dataset/processed/` junto com um manifesto.
-
-### 3. Treinar o adapter QLoRA
-
-Execute em uma sessão com GPU CUDA:
+Config Continue do projeto: `.continue/config.json`  
+- `Ollama Qwen 1.5B Celx` → `qwen2.5:1.5b-celx` @ `http://127.0.0.1:11434`  
+- `Celx Legacy Doc` → `http://127.0.0.1:8000/v1` (com a API acima rodando)
 
 ```bash
-python scripts/train_qlora.py --config configs/default.yaml
+source .venv/bin/activate
+bash scripts/pipeline_full.sh
+# ou acompanhar treino:
+python scripts/watch_training.py
 ```
 
-### 4. Documentar uma função
+Ver `docs/PLANO.md`.
 
-Com o modelo-base:
+## Modelo e dados previstos
 
-```bash
-python scripts/document_code.py \
-  --file dataset/examples/calcula_total.py \
-  --language python
-```
-
-Com um adapter treinado:
-
-```bash
-python scripts/document_code.py \
-  --file dataset/examples/calcula_total.py \
-  --language python \
-  --adapter models/qwen3-legacy-doc-qlora
-```
-
-## Modelo e dataset iniciais
-
-- Modelo configurado: `Qwen/Qwen3-1.7B`.
-- Dataset: `google/code_x_glue_ct_code_to_text`.
-- Linguagens CodeXGLUE: PHP, Python e JavaScript.
-- Linguagem complementar: SQL, com pipeline de dados próprio.
-
-Esses padrões ficam em `configs/default.yaml` e podem ser substituídos pela linha de comando.
-A escolha final do modelo será registrada após o baseline comparativo da Semana 2.
-
-## Limitação importante do dataset
-
-O CodeXGLUE oferece pares de código e docstring, mas docstrings não contêm necessariamente
-regras de negócio completas. A primeira etapa ensina o modelo a relacionar código e descrição.
-SQL não faz parte desse dataset e exigirá uma fonte pública complementar ou exemplos próprios
-devidamente licenciados. Depois será criado um subconjunto curado, em português, para ensinar o formato documental e a
-separação entre evidência e incerteza.
-
-## Princípios de qualidade
-
-- Não apresentar inferências como regras confirmadas.
-- Não assumir comportamento para nulos, exceções ou integrações ausentes.
-- Manter rastreabilidade entre documentação e código analisado.
-- Avaliar fidelidade, clareza, cobertura e consistência do formato.
-- Comparar o adapter ao mesmo modelo-base sem Fine-Tuning.
+- Candidatos: `Qwen/Qwen3-1.7B` e Ministral 3B (`configs/model_candidates.yaml`)
+- Dataset: CodeXGLUE code-to-text + SQL complementar + curadoria em português

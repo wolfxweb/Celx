@@ -1,0 +1,54 @@
+{
+  "status": "pending_human_review",
+  "language": "pt-BR",
+  "mode": "escala_2k",
+  "seed": 42,
+  "normalized_dir": "dataset/processed/full",
+  "benchmark_fingerprints_excluded": 0,
+  "totals": {
+    "rows": 8000,
+    "per_language_target": {
+      "train": 1600,
+      "validation": 200,
+      "test": 200
+    },
+    "languages": [
+      "python",
+      "php",
+      "javascript",
+      "sql"
+    ]
+  },
+  "splits": {
+    "train": {
+      "path": "dataset/curated/queues/train_review_queue.jsonl",
+      "rows": 6400,
+      "per_language": {
+        "python": 1600,
+        "php": 1600,
+        "javascript": 1600,
+        "sql": 1600
+      }
+    },
+    "validation": {
+      "path": "dataset/curated/queues/validation_review_queue.jsonl",
+      "rows": 800,
+      "per_language": {
+        "python": 200,
+        "php": 200,
+        "javascript": 200,
+        "sql": 200
+      }
+    },
+    "test": {
+      "path": "dataset/curated/queues/test_review_queue.jsonl",
+      "rows": 800,
+      "per_language": {
+        "python": 200,
+        "php": 200,
+        "javascript": 200,
+        "sql": 200
+      }
+    }
+  }
+}

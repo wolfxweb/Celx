@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from legacy_doc.thinking import strip_thinking
+
 
 REQUIRED_SECTIONS = (
     "### Objetivo",
@@ -56,7 +58,7 @@ def main() -> None:
         writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
         for record in records:
-            response = record["response"]
+            response = strip_thinking(record["response"])
             present = sum(section in response for section in REQUIRED_SECTIONS)
             writer.writerow(
                 {

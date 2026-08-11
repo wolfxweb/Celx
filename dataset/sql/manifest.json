@@ -1,0 +1,18 @@
+{
+  "source": "xlangai/spider",
+  "seed": 42,
+  "splits": {
+    "test": {
+      "rows": 200,
+      "path": "dataset/sql/test.jsonl"
+    },
+    "validation": {
+      "rows": 200,
+      "path": "dataset/sql/validation.jsonl"
+    },
+    "train": {
+      "rows": 1600,
+      "path": "dataset/sql/train.jsonl"
+    }
+  }
+}

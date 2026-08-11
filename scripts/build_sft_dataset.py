@@ -10,17 +10,11 @@ from datasets import Dataset
 from transformers import AutoTokenizer
 
 from legacy_doc.config import load_config
-from legacy_doc.prompts import SYSTEM_PROMPT, user_prompt
+from legacy_doc.prompts import curated_messages, required_sections
 
 
-REQUIRED_SECTIONS = (
-    "### Objetivo",
-    "### Parâmetros",
-    "### Retorno",
-    "### Funcionamento",
-    "### Regras de negócio identificadas",
-    "### Pontos não determinados",
-)
+REQUIRED_SECTIONS = required_sections("pt-BR")
+
 
 
 def parse_args() -> argparse.Namespace:
@@ -55,11 +49,7 @@ def fingerprint(row: dict[str, Any]) -> str:
 
 
 def render(row: dict[str, Any], tokenizer: AutoTokenizer) -> dict[str, Any]:
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": user_prompt(row["language"], row["code"])},
-        {"role": "assistant", "content": row["documentation_pt"].strip()},
-    ]
+    messages = curated_messages(row["language"], row["code"], row["documentation_pt"], "pt-BR")
     kwargs = {"tokenize": False, "add_generation_prompt": False}
     try:
         text = tokenizer.apply_chat_template(messages, enable_thinking=False, **kwargs)

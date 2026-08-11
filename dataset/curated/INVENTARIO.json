@@ -1,0 +1,429 @@
+{
+  "kind": "celx_dataset_inventory",
+  "note": "pt-BR real = documentation_pt curada/aprovada. EN embrulhado = reference CodeXGLUE/Spider em template PT (não é documentação pt-BR).",
+  "targets": {
+    "piloto_per_language": {
+      "train": 50,
+      "validation": 10,
+      "test": 10,
+      "total": 280
+    },
+    "meta_v1_per_language": {
+      "train": 500,
+      "validation": 50,
+      "test": 50,
+      "total": 2400
+    },
+    "escala_2k_per_language": {
+      "train": 1600,
+      "validation": 200,
+      "test": 200,
+      "total_per_language": 2000,
+      "total": 8000
+    }
+  },
+  "pt_br": {
+    "curated_approved": {
+      "path": "/Users/wolfx/Documents/Dev/Celx/dataset/curated",
+      "exists": true,
+      "splits": {
+        "train": {
+          "rows": 4,
+          "languages": {
+            "javascript": 1,
+            "php": 1,
+            "python": 1,
+            "sql": 1
+          },
+          "review_status": {
+            "approved": 4
+          },
+          "sources": {
+            "exemplo_manual": 4
+          },
+          "with_documentation_pt": 4
+        },
+        "validation": {
+          "rows": 1,
+          "languages": {
+            "python": 1
+          },
+          "review_status": {
+            "approved": 1
+          },
+          "sources": {
+            "exemplo_manual": 1
+          },
+          "with_documentation_pt": 1
+        },
+        "test": {
+          "rows": 0,
+          "languages": {},
+          "review_status": {},
+          "sources": {},
+          "with_documentation_pt": 0
+        }
+      },
+      "total_rows": 5,
+      "languages": {
+        "javascript": 1,
+        "php": 1,
+        "python": 2,
+        "sql": 1
+      },
+      "sources": {
+        "exemplo_manual": 5
+      },
+      "review_status": {
+        "approved": 5
+      },
+      "with_documentation_pt": 5
+    },
+    "curated_smoke": {
+      "path": "/Users/wolfx/Documents/Dev/Celx/dataset/curated_smoke",
+      "exists": true,
+      "splits": {
+        "train": {
+          "rows": 12,
+          "languages": {
+            "javascript": 3,
+            "php": 3,
+            "python": 3,
+            "sql": 3
+          },
+          "review_status": {
+            "approved": 12
+          },
+          "sources": {
+            "smoke_local": 12
+          },
+          "with_documentation_pt": 12
+        },
+        "validation": {
+          "rows": 1,
+          "languages": {
+            "python": 1
+          },
+          "review_status": {
+            "approved": 1
+          },
+          "sources": {
+            "smoke_local": 1
+          },
+          "with_documentation_pt": 1
+        },
+        "test": {
+          "rows": 2,
+          "languages": {
+            "javascript": 1,
+            "php": 1
+          },
+          "review_status": {
+            "approved": 2
+          },
+          "sources": {
+            "smoke_local": 2
+          },
+          "with_documentation_pt": 2
+        }
+      },
+      "total_rows": 15,
+      "languages": {
+        "javascript": 4,
+        "php": 4,
+        "python": 4,
+        "sql": 3
+      },
+      "sources": {
+        "smoke_local": 15
+      },
+      "review_status": {
+        "approved": 15
+      },
+      "with_documentation_pt": 15
+    },
+    "review_queues": {
+      "path": "/Users/wolfx/Documents/Dev/Celx/dataset/curated/queues",
+      "exists": true,
+      "splits": {
+        "train": {
+          "rows": 6400,
+          "pending": 6400,
+          "languages": {
+            "javascript": 1600,
+            "php": 1600,
+            "python": 1600,
+            "sql": 1600
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/curated/queues/train_review_queue.jsonl"
+        },
+        "validation": {
+          "rows": 800,
+          "pending": 800,
+          "languages": {
+            "javascript": 200,
+            "php": 200,
+            "python": 200,
+            "sql": 200
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/curated/queues/validation_review_queue.jsonl"
+        },
+        "test": {
+          "rows": 800,
+          "pending": 800,
+          "languages": {
+            "javascript": 200,
+            "php": 200,
+            "python": 200,
+            "sql": 200
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/curated/queues/test_review_queue.jsonl"
+        }
+      },
+      "total_rows": 8000,
+      "pending": 8000,
+      "languages": {
+        "javascript": 2000,
+        "php": 2000,
+        "python": 2000,
+        "sql": 2000
+      },
+      "manifest": {
+        "status": "pending_human_review",
+        "language": "pt-BR",
+        "mode": "escala_2k",
+        "seed": 42,
+        "normalized_dir": "dataset/processed/full",
+        "benchmark_fingerprints_excluded": 0,
+        "totals": {
+          "rows": 8000,
+          "per_language_target": {
+            "train": 1600,
+            "validation": 200,
+            "test": 200
+          },
+          "languages": [
+            "python",
+            "php",
+            "javascript",
+            "sql"
+          ]
+        },
+        "splits": {
+          "train": {
+            "path": "dataset/curated/queues/train_review_queue.jsonl",
+            "rows": 6400,
+            "per_language": {
+              "python": 1600,
+              "php": 1600,
+              "javascript": 1600,
+              "sql": 1600
+            }
+          },
+          "validation": {
+            "path": "dataset/curated/queues/validation_review_queue.jsonl",
+            "rows": 800,
+            "per_language": {
+              "python": 200,
+              "php": 200,
+              "javascript": 200,
+              "sql": 200
+            }
+          },
+          "test": {
+            "path": "dataset/curated/queues/test_review_queue.jsonl",
+            "rows": 800,
+            "per_language": {
+              "python": 200,
+              "php": 200,
+              "javascript": 200,
+              "sql": 200
+            }
+          }
+        }
+      }
+    }
+  },
+  "english_normalized": {
+    "codexglue": {
+      "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/codexglue",
+      "splits": {
+        "train": {
+          "rows": 900,
+          "languages": {
+            "javascript": 300,
+            "php": 300,
+            "python": 300
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/codexglue/train"
+        },
+        "validation": {
+          "rows": 150,
+          "languages": {
+            "javascript": 50,
+            "php": 50,
+            "python": 50
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/codexglue/validation"
+        },
+        "test": {
+          "rows": 150,
+          "languages": {
+            "javascript": 50,
+            "php": 50,
+            "python": 50
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/codexglue/test"
+        }
+      },
+      "total_rows": 1200,
+      "languages": {
+        "javascript": 400,
+        "php": 400,
+        "python": 400
+      },
+      "exists": true
+    },
+    "full": {
+      "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/full",
+      "splits": {
+        "train": {
+          "rows": 6400,
+          "languages": {
+            "javascript": 1600,
+            "php": 1600,
+            "python": 1600,
+            "sql": 1600
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/full/train"
+        },
+        "validation": {
+          "rows": 800,
+          "languages": {
+            "javascript": 200,
+            "php": 200,
+            "python": 200,
+            "sql": 200
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/full/validation"
+        },
+        "test": {
+          "rows": 800,
+          "languages": {
+            "javascript": 200,
+            "php": 200,
+            "python": 200,
+            "sql": 200
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/full/test"
+        }
+      },
+      "total_rows": 8000,
+      "languages": {
+        "javascript": 2000,
+        "php": 2000,
+        "python": 2000,
+        "sql": 2000
+      },
+      "exists": true
+    }
+  },
+  "sft": {
+    "sft": {
+      "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/sft",
+      "splits": {
+        "train": {
+          "rows": 1,
+          "languages": {
+            "sql": 1
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/sft/train"
+        },
+        "validation": {
+          "rows": 2,
+          "languages": {
+            "python": 2
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/sft/validation"
+        },
+        "test": {
+          "rows": 2,
+          "languages": {
+            "javascript": 1,
+            "php": 1
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/sft/test"
+        }
+      },
+      "exists": true,
+      "total_rows": 5,
+      "manifest": {
+        "model": "Qwen/Qwen3-1.7B",
+        "splits": {
+          "test": 2,
+          "validation": 2,
+          "train": 1
+        }
+      }
+    },
+    "sft_real": {
+      "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/sft_real",
+      "splits": {
+        "train": {
+          "rows": 900,
+          "languages": {
+            "javascript": 300,
+            "php": 300,
+            "python": 300
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/sft_real/train"
+        },
+        "validation": {
+          "rows": 150,
+          "languages": {
+            "javascript": 50,
+            "php": 50,
+            "python": 50
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/sft_real/validation"
+        },
+        "test": {
+          "rows": 150,
+          "languages": {
+            "javascript": 50,
+            "php": 50,
+            "python": 50
+          },
+          "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/sft_real/test"
+        }
+      },
+      "exists": true,
+      "total_rows": 1200,
+      "manifest": {
+        "model": "Qwen/Qwen3-1.7B",
+        "source": "code_x_glue_normalized",
+        "kind": "real_stage1",
+        "splits": {
+          "train": 900,
+          "validation": 150,
+          "test": 150
+        }
+      }
+    },
+    "sft_full": {
+      "path": "/Users/wolfx/Documents/Dev/Celx/dataset/processed/sft_full",
+      "splits": {
+        "train": null,
+        "validation": null,
+        "test": null
+      },
+      "exists": false,
+      "total_rows": 0
+    }
+  },
+  "decision_inputs": {
+    "pt_br_approved_rows": 5,
+    "queue_pending_rows": 8000,
+    "en_normalized_train_rows": 6400
+  }
+}

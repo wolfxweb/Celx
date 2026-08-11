@@ -1,26 +1,17 @@
 # Dados SQL
 
-O CodeXGLUE Code-to-Text não possui uma configuração SQL. Por isso, os dados SQL ficam
-separados para preservar a procedência e a licença de cada exemplo.
+O CodeXGLUE Code-to-Text não possui SQL. Este diretório recebe exemplos gerados por:
 
-## Formato esperado
-
-Cada divisão deverá ser um arquivo JSON Lines: `train.jsonl`, `validation.jsonl` e `test.jsonl`.
-
-```json
-{"id":"sql-001","language":"sql","code":"SELECT ...","reference":"Lista ...","source":"...","license":"..."}
+```bash
+python scripts/prepare_sql_spider.py --config configs/train_full.yaml
 ```
 
-Campos obrigatórios:
+Isso baixa `xlangai/spider` e grava `train.jsonl`, `validation.jsonl`, `test.jsonl`.
 
-- `id`: identificador estável;
-- `language`: sempre `sql`;
-- `code`: consulta, view, function, trigger ou procedure;
-- `reference`: descrição fiel do comportamento;
-- `source`: origem rastreável;
-- `license`: licença que permita o uso no treinamento.
+## Formato
 
-Nenhum dado SQL será incluído no treinamento antes da validação de origem, licença, duplicatas
-e qualidade da descrição. Os exemplos em `dataset/examples/` são demonstrações do projeto, não
-constituem um dataset de treinamento.
+```json
+{"id":"...","language":"sql","code":"SELECT ...","reference":"...","source":"xlangai/spider","license":"CC-BY-SA-4.0"}
+```
 
+O notebook `04` / `prepare_dataset.py` mescla esses arquivos com PHP/Python/JavaScript do CodeXGLUE.

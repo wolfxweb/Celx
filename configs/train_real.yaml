@@ -1,0 +1,58 @@
+# Treino real (CodeXGLUE → SFT → LoRA). Não usa smoke.
+# Ajustado para Mac M1 8GB (MPS). Na nuvem, aumente max_length e samples.
+
+project:
+  seed: 42
+  output_dir: models/qwen3-legacy-doc-lora-real
+
+data:
+  dataset_name: google/code_x_glue_ct_code_to_text
+  codexglue_languages: [python, php, javascript]
+  target_languages: [python, php, javascript, sql]
+  sql_dataset_path: dataset/sql
+  max_train_samples_per_language: 300
+  max_validation_samples_per_language: 50
+  max_test_samples_per_language: 50
+  min_code_chars: 40
+  max_code_chars: 12000
+  normalized_dir: dataset/processed/codexglue
+  curated_dir: dataset/curated
+  sft_dir: dataset/processed/sft_real
+
+model:
+  name: Qwen/Qwen3-1.7B
+  # 512 reduz pico de memória no MPS (1024 costuma estourar 8GB).
+  max_length: 512
+  load_in_4bit: false
+  trust_remote_code: false
+
+training:
+  num_train_epochs: 1
+  learning_rate: 0.0002
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 8
+  warmup_ratio: 0.03
+  logging_steps: 5
+  # Eval no MPS consome muita RAM — desligado no Mac; ligue na nuvem.
+  eval_strategy: "no"
+  eval_steps: 200
+  save_steps: 10
+  save_total_limit: 3
+  gradient_checkpointing: true
+  bf16: false
+  fp16: false
+  lora_r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+  report_to: [tensorboard]
+  logging_dir: outputs/training_real/runs
+  metrics_csv: outputs/training_real/metrics.csv
+  min_train_samples: 100
+
+generation:
+  max_new_tokens: 1600
+  temperature: 0.2
+  top_p: 0.9
+  enable_thinking: true

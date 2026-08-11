@@ -1,0 +1,72 @@
+# Treino nuvem (RunPod A4500 20GB): PHP + JavaScript + SQL completos.
+# Python fora. Rótulos = reference EN embrulhada no template PT (stage-1).
+#
+# Volumes approx (train):
+#   PHP CodeXGLUE  ~241.241
+#   JS  CodeXGLUE  ~58.025
+#   SQL Spider     ~5–7k únicos
+#   Total          ~300k+
+#
+# Uso:
+#   bash scripts/pipeline_full.sh configs/train_php_js_sql_full.yaml
+#   # ou: python scripts/train_qlora.py --config configs/train_php_js_sql_full.yaml
+
+project:
+  seed: 42
+  output_dir: models/qwen3-legacy-doc-qlora-php-js-sql
+
+data:
+  dataset_name: google/code_x_glue_ct_code_to_text
+  codexglue_languages: [php, javascript]
+  target_languages: [php, javascript, sql]
+  sql_dataset_path: dataset/sql
+  # Teto alto = usa o split inteiro (prepare faz min(limit, len)).
+  max_train_samples_per_language: 300000
+  max_validation_samples_per_language: 2000
+  max_test_samples_per_language: 2000
+  min_code_chars: 40
+  max_code_chars: 12000
+  normalized_dir: dataset/processed/full_php_js_sql
+  curated_dir: dataset/curated
+  sft_dir: dataset/processed/sft_php_js_sql
+
+model:
+  name: Qwen/Qwen3-1.7B
+  max_length: 1024
+  load_in_4bit: true
+  trust_remote_code: false
+
+training:
+  num_train_epochs: 1
+  learning_rate: 0.0002
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 8
+  warmup_ratio: 0.03
+  logging_steps: 20
+  eval_strategy: "no"
+  eval_steps: 500
+  save_steps: 500
+  save_total_limit: 1
+  gradient_checkpointing: true
+  bf16: true
+  fp16: false
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+  report_to: [tensorboard]
+  logging_dir: outputs/training_php_js_sql/runs
+  metrics_csv: outputs/training_php_js_sql/metrics.csv
+  min_train_samples: 1000
+
+evaluation:
+  max_samples: 24
+  max_new_tokens: 512
+  output_dir: outputs/eval_php_js_sql
+
+generation:
+  max_new_tokens: 1600
+  temperature: 0.2
+  top_p: 0.9
+  enable_thinking: true

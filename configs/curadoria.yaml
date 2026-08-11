@@ -1,0 +1,58 @@
+# Curadoria pt-BR: volumes para fila humana e decisão local vs nuvem.
+# Não treina modelo — só define o tamanho da base em português.
+
+project:
+  seed: 42
+  output_dir: models/qwen3-legacy-doc-lora-full
+
+data:
+  dataset_name: google/code_x_glue_ct_code_to_text
+  codexglue_languages: [python, php, javascript]
+  target_languages: [python, php, javascript, sql]
+  sql_dataset_path: dataset/sql
+  # Pool normalizado EN (fonte da fila). Precisa ser >= meta da fila.
+  max_train_samples_per_language: 1600
+  max_validation_samples_per_language: 200
+  max_test_samples_per_language: 200
+  min_code_chars: 40
+  max_code_chars: 12000
+  normalized_dir: dataset/processed/full
+  curated_dir: dataset/curated
+  sft_dir: dataset/processed/sft
+
+# Volumes da fila de revisão (documentation_pt vazia até curadoria humana).
+curation:
+  # piloto: 50/10/10 × 4 = 280
+  # meta_v1: 500/50/50 × 4 = 2.400
+  # escala_2k: 1600/200/200 × 4 = 8.000 (2.000 por linguagem)
+  mode: escala_2k
+  piloto:
+    train_per_language: 50
+    validation_per_language: 10
+    test_per_language: 10
+  meta_v1:
+    train_per_language: 500
+    validation_per_language: 50
+    test_per_language: 50
+  escala_2k:
+    train_per_language: 1600
+    validation_per_language: 200
+    test_per_language: 200
+  queue_dir: dataset/curated/queues
+  benchmark: dataset/benchmark/expanded_100.jsonl
+
+model:
+  name: Qwen/Qwen3-1.7B
+  max_length: 512
+  load_in_4bit: false
+  trust_remote_code: false
+
+training:
+  num_train_epochs: 1
+  min_train_samples: 50
+
+generation:
+  max_new_tokens: 1600
+  temperature: 0.2
+  top_p: 0.9
+  enable_thinking: true

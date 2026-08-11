@@ -1,0 +1,27 @@
+# Smoke local / Mac: 4 casos de controle (baseline.jsonl).
+# No Kaggle use configs/model_candidates.yaml (400 casos).
+
+candidates:
+  - id: Qwen/Qwen3-1.7B
+    short_name: qwen3-1.7b
+    parameters_billions: 1.7
+    license: apache-2.0
+    gated: false
+    enabled: true
+    notes: Smoke local.
+
+  - id: mistralai/Ministral-3-3B-Instruct-2512-BF16
+    short_name: ministral3-3b
+    parameters_billions: 3.0
+    license: apache-2.0
+    gated: false
+    enabled: true
+    notes: Pesado neste Mac; preferir só no Kaggle.
+
+benchmark:
+  dataset: dataset/benchmark/baseline.jsonl
+  output_dir: outputs/baseline
+  samples_per_language: 1
+  max_new_tokens: 1600
+  temperature: 0.0
+  enable_thinking: true

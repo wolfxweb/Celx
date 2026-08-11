@@ -9,6 +9,7 @@ $destinationDirectory = Split-Path -Parent $destination
 
 New-Item -ItemType Directory -Force -Path $destinationDirectory | Out-Null
 
+# Empacota a raiz ativa. O histórico em arquivos/ não entra no ZIP.
 $included = @(
     ".gitignore",
     "README.md",

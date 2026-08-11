@@ -1,16 +1,29 @@
 # Notebooks
 
-Fluxo único, na ordem sugerida:
+| Notebook | Quando | Dados |
+|---|---|---|
+| `01_benchmark.ipynb` | Escolher modelo | 4 casos locais |
+| `02_treino_qlora.ipynb` | Smoke / validar pipeline | dataset mínimo |
+| `03_treino_real.ipynb` | Treino real + export | CodeXGLUE → LoRA |
+| `04_pipeline_completo.ipynb` | **Produção end-to-end** | Stage A/B/C — Mac ou **RunPod Jupyter** |
 
-| Notebook | Finalidade |
+```text
+01_benchmark → 04_pipeline_completo  (recomendado; também no RunPod)
+            ↘ 03_treino_real         (só CodeXGLUE, sem SQL)
+            ↘ 02_treino_qlora        (smoke)
+```
+
+Kernel local: **Python (Celx .venv)**  
+RunPod: template Jupyter + `docs/RUNPOD.md`  
+Watch: `python scripts/watch_training.py`  
+
+| Ambiente | Config stage A |
 |---|---|
-| `01_baseline_colab.ipynb` | Baseline dos modelos candidatos |
-| `02_dados_codexglue_colab.ipynb` | Aquisição e preparação do CodeXGLUE |
-| `03_benchmark_100_colab.ipynb` | Benchmark 100×4 linguagens no Colab |
-| `03_benchmark_100_kaggle.ipynb` | Mesmo benchmark no Kaggle |
-| `04_treinamento_qwen3_runpod.ipynb` | QLoRA no RunPod |
-| `05_preparacao_dataset_sft.ipynb` | Curadoria e dataset SFT |
+| M1 local | `configs/train_full.yaml` |
+| CUDA / A4500 (RunPod) | `configs/train_php_js_sql_full.yaml` |
+| Bilingue | `configs/train_bilingual.yaml` |
 
-Resultados versionados do baseline ficam em `dataset/benchmark/results/`.
-Saídas de execução novas vão para `outputs/`.
-Relatórios oficiais ficam em `docs/`.
+```bash
+bash scripts/package_project.sh   # → dist/Celx-colab.zip (upload no RunPod)
+bash scripts/pipeline_full.sh configs/train_php_js_sql_full.yaml
+```

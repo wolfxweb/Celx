@@ -7,6 +7,8 @@ from pathlib import Path
 from statistics import mean
 from typing import Any
 
+from legacy_doc.thinking import strip_thinking
+
 
 REQUIRED_SECTIONS = (
     "### Objetivo",
@@ -40,7 +42,10 @@ def main() -> None:
         if not records:
             continue
         structure = [
-            sum(section in record["response"] for section in REQUIRED_SECTIONS)
+            sum(
+                section in strip_thinking(record["response"])
+                for section in REQUIRED_SECTIONS
+            )
             / len(REQUIRED_SECTIONS)
             for record in records
         ]

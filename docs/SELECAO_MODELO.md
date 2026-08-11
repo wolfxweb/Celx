@@ -21,13 +21,14 @@ publicação do adapter.
 
 ## Protocolo
 
-1. Executar o benchmark em ambiente Colab com a mesma GPU.
-2. Usar quantização 4-bit em todos os modelos compatíveis.
-3. Usar temperatura zero e limite de 700 novos tokens.
-4. Processar os casos sempre na mesma ordem.
-5. Preservar resposta, tempo e quantidade de tokens.
-6. Avaliar as respostas sem identificar o modelo ao avaliador quando possível.
-7. Aplicar a rubrica em `docs/RUBRICA.md`.
+1. Preparar o projeto neste Mac e empacotar com `bash scripts/package_project.sh`.
+2. Executar o benchmark no Kaggle (preferencial) ou Colab, sempre na mesma GPU da sessão.
+3. Usar quantização 4-bit em todos os modelos compatíveis.
+4. Usar temperatura zero; Qwen3 com `enable_thinking: true` (raciocínio sempre ativo) e até 1600 novos tokens.
+5. Processar os casos sempre na mesma ordem.
+6. Preservar resposta, tempo e quantidade de tokens em `outputs/`.
+7. Avaliar as respostas sem identificar o modelo ao avaliador quando possível.
+8. Aplicar a rubrica em `docs/RUBRICA.md`.
 
 ## Casos mínimos
 
@@ -45,25 +46,16 @@ expandido mede estrutura, estabilidade e desempenho; a fidelidade exige revisão
 
 ## Comandos
 
-No Google Colab, use `notebooks/01_baseline_colab.ipynb`. O notebook valida a GPU, instala as
-dependências, recebe o projeto em ZIP, executa o Qwen e exporta a planilha de avaliação.
-
-Executar somente o Qwen:
+Notebook principal de seleção: `notebooks/01_benchmark.ipynb`.
+Treino (depois): `notebooks/02_treino_qlora.ipynb`.
 
 ```bash
+bash scripts/package_project.sh
+# na GPU (Kaggle/Colab), a partir da raiz do projeto:
 python scripts/run_baseline.py --model qwen3-1.7b
-```
-
-Executar os dois candidatos:
-
-```bash
 python scripts/run_baseline.py
-```
-
-Criar a planilha de avaliação:
-
-```bash
 python scripts/score_baseline.py
+python scripts/compare_models.py
 ```
 
 ## Pontuação de decisão
@@ -83,7 +75,8 @@ menor consumo de memória.
 
 ## Estado da decisão
 
-- Modelo selecionado para o primeiro ciclo: `Qwen/Qwen3-1.7B`.
-- Baseline alternativo: `mistralai/Ministral-3-3B-Instruct-2512-BF16`.
-- Fundamentação: `docs/RELATORIO_BASELINE.md`.
+- Ciclo reiniciado: decisão do modelo deve ser **reconfirmada** neste benchmark.
+- Candidato provisional (histórico): `Qwen/Qwen3-1.7B`.
+- Alternativa: `mistralai/Ministral-3-3B-Instruct-2512-BF16`.
+- Relatórios antigos: `arquivos/docs/RELATORIO_BASELINE.md`.
 - Dataset ou modelo baixado neste PC: não.

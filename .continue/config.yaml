@@ -1,0 +1,29 @@
+name: Celx Local
+version: 1.0.0
+schema: v1
+models:
+  - name: Celx Qwen 1.5B
+    provider: ollama
+    model: qwen2.5:1.5b-celx
+    roles:
+      - chat
+      - edit
+      - apply
+  - name: Qwen 1.5B
+    provider: ollama
+    model: qwen2.5:1.5b
+    roles:
+      - chat
+      - autocomplete
+  - name: Celx Adapter API
+    provider: openai
+    model: celx-legacy-doc
+    apiBase: http://127.0.0.1:8000/v1
+    apiKey: local
+    roles:
+      - chat
+  - name: Nomic Embed
+    provider: ollama
+    model: nomic-embed-text:latest
+    roles:
+      - embed

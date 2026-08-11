@@ -44,11 +44,16 @@ ou instalação. Cada operação terá um comando explícito e artefatos fora do
 
 ## D006 — Modelo-base selecionado
 
-- Estado: aceita para o primeiro ciclo
+- Estado: provisória (reabrir após reset)
 - Data: 01/08/2026
 
-O `Qwen/Qwen3-1.7B` será o modelo-base do primeiro Fine-Tuning QLoRA. No baseline com quatro
-linguagens, foi aproximadamente 42,3% mais rápido que o Ministral, gerou 49,3% menos tokens e
-apresentou maior aderência ao formato. O Ministral permanece apenas como referência comparativa.
+No ciclo anterior, `Qwen/Qwen3-1.7B` venceu o baseline curto. Após o reset, a escolha deve ser
+reconfirmada pelo benchmark da Fase 2 (`docs/PLANO.md`). Histórico em `arquivos/docs/`.
 
-A decisão será reavaliada após a expansão do benchmark e a avaliação humana independente.
+## D007 — Reset do repositório
+
+- Estado: aceita
+- Data: 06/08/2026
+
+O estado anterior foi arquivado em `arquivos/`. A raiz contém apenas o ciclo ativo. Fonte da
+verdade: raiz + `docs/PLANO.md`. Não editar `arquivos/` como código vivo.

@@ -73,6 +73,28 @@ def prepare_split(
     return merged.select(selected)
 
 
+def load_sql_split(sql_dir: Path, split: str) -> Dataset | None:
+    path = sql_dir / f"{split}.jsonl"
+    if not path.exists():
+        return None
+    rows: list[dict[str, Any]] = []
+    with path.open(encoding="utf-8") as stream:
+        for line in stream:
+            line = line.strip()
+            if not line:
+                continue
+            row = json.loads(line)
+            rows.append(
+                {
+                    "id": row["id"],
+                    "language": "sql",
+                    "code": str(row["code"]).strip(),
+                    "reference": str(row["reference"]).strip(),
+                }
+            )
+    return Dataset.from_list(rows) if rows else None
+
+
 def main() -> None:
     args = parse_args()
     cfg = load_config(args.config)
@@ -85,6 +107,8 @@ def main() -> None:
         "dataset": data_cfg["dataset_name"],
         "model_for_future_tokenization": model_name,
         "status": "normalized_not_ready_for_sft",
+        "languages": list(data_cfg.get("codexglue_languages", [])),
+        "sql_merged": False,
     }
     seen_ids: set[str] = set()
     prepared_splits: dict[str, Dataset] = {}
@@ -102,11 +126,51 @@ def main() -> None:
         )
         prepared_splits[split] = prepared
 
+    sql_dir = Path(data_cfg.get("sql_dataset_path", "dataset/sql"))
+    want_sql = "sql" in [str(x).lower() for x in data_cfg.get("target_languages", [])]
+    if want_sql:
+        sql_parts: list[str] = []
+        for split in ("train", "validation", "test"):
+            sql_ds = load_sql_split(sql_dir, split)
+            if sql_ds is None:
+                continue
+            # Evita IDs já usados pelo CodeXGLUE (improvável, mas seguro).
+            keep = [
+                i
+                for i, item_id in enumerate(sql_ds["id"])
+                if item_id not in seen_ids
+            ]
+            if not keep:
+                continue
+            sql_ds = sql_ds.select(keep)
+            seen_ids.update(sql_ds["id"])
+            prepared_splits[split] = concatenate_datasets(
+                [prepared_splits[split], sql_ds]
+            ).shuffle(seed=cfg["project"]["seed"])
+            sql_parts.append(f"{split}:{len(sql_ds)}")
+        if sql_parts:
+            manifest["sql_merged"] = True
+            manifest["sql_source"] = str(sql_dir)
+            manifest["sql_counts"] = sql_parts
+            manifest["languages"] = list(
+                dict.fromkeys([*manifest["languages"], "sql"])
+            )
+        else:
+            print(
+                f"Aviso: SQL pedido em target_languages, mas sem JSONL em {sql_dir}. "
+                "Rode scripts/prepare_sql_spider.py antes."
+            )
+
     for split in ("train", "validation", "test"):
         prepared = prepared_splits[split]
         prepared.save_to_disk(str(output / split))
         prepared.to_json(output / f"{split}.jsonl", force_ascii=False)
-        manifest[split] = {"rows": len(prepared), "path": str(output / split)}
+        languages = sorted(set(prepared["language"]))
+        manifest[split] = {
+            "rows": len(prepared),
+            "path": str(output / split),
+            "languages": languages,
+        }
 
     (output / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"

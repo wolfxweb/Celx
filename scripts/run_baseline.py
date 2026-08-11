@@ -18,6 +18,7 @@ from transformers import (
 )
 
 from legacy_doc.prompts import SYSTEM_PROMPT, user_prompt
+from legacy_doc.thinking import apply_chat_template, extract_thinking, strip_thinking
 
 
 def parse_args() -> argparse.Namespace:
@@ -33,14 +34,6 @@ def parse_args() -> argparse.Namespace:
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
     with path.open(encoding="utf-8") as stream:
         return [json.loads(line) for line in stream if line.strip()]
-
-
-def apply_template(tokenizer: Any, messages: list[dict[str, str]]) -> str:
-    kwargs = {"tokenize": False, "add_generation_prompt": True}
-    try:
-        return tokenizer.apply_chat_template(messages, enable_thinking=False, **kwargs)
-    except TypeError:
-        return tokenizer.apply_chat_template(messages, **kwargs)
 
 
 def multimodal_messages(messages: list[dict[str, str]]) -> list[dict[str, Any]]:
@@ -123,6 +116,7 @@ def main() -> None:
                         "content": user_prompt(example["language"], example["code"]),
                     },
                 ]
+                enable_thinking = bool(benchmark_cfg.get("enable_thinking", True))
                 if is_mistral3:
                     inputs = processor.apply_chat_template(
                         multimodal_messages(messages),
@@ -132,7 +126,9 @@ def main() -> None:
                         add_generation_prompt=True,
                     ).to(model.device)
                 else:
-                    prompt = apply_template(tokenizer, messages)
+                    prompt = apply_chat_template(
+                        tokenizer, messages, enable_thinking=enable_thinking
+                    )
                     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
                 started = time.perf_counter()
                 with torch.inference_mode():
@@ -149,21 +145,29 @@ def main() -> None:
                 elapsed = time.perf_counter() - started
                 new_tokens = generated[0, inputs["input_ids"].shape[1] :]
                 decoder = processor if is_mistral3 else tokenizer
-                response = decoder.batch_decode(new_tokens.unsqueeze(0), skip_special_tokens=True)[
-                    0
-                ].strip()
+                raw_response = decoder.batch_decode(
+                    new_tokens.unsqueeze(0), skip_special_tokens=True
+                )[0].strip()
+                response = strip_thinking(raw_response)
                 record = {
                     **example,
                     "model": model_id,
                     "response": response,
+                    "response_raw": raw_response,
+                    "thinking": extract_thinking(raw_response),
+                    "enable_thinking": enable_thinking,
                     "elapsed_seconds": round(elapsed, 3),
                     "generated_tokens": int(new_tokens.shape[0]),
                 }
                 stream.write(json.dumps(record, ensure_ascii=False) + "\n")
                 stream.flush()
                 processed += 1
-                if processed % 10 == 0 or processed == len(examples):
-                    print(f"{candidate['short_name']}: {processed}/{len(examples)}")
+                print(
+                    f"{candidate['short_name']}: {processed}/{len(examples)} "
+                    f"({example['id']}, {record['elapsed_seconds']}s, "
+                    f"{record['generated_tokens']} tokens)",
+                    flush=True,
+                )
         del model
         if torch.cuda.is_available():
             torch.cuda.empty_cache()

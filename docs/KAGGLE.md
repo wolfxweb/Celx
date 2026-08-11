@@ -1,22 +1,28 @@
 # Execução no Kaggle
 
-Use um Kaggle Notebook comum criado em `https://www.kaggle.com/code/new`. Não use a área
-Kaggle Benchmarks nem crie um Benchmark Task, pois esse ambiente pode não incluir PyTorch ou GPU.
+Use um Kaggle Notebook comum em `https://www.kaggle.com/code/new`.
+Não use a área Kaggle Benchmarks / Benchmark Task.
 
-## Configuração
+## Benchmark (Fase 2)
 
-1. Abra `03_benchmark_100_kaggle.ipynb` em um Notebook comum.
-2. Em Settings, selecione GPU T4 ou P100.
-3. Ative Internet.
-4. Em Add Input, crie ou selecione um dataset privado contendo `Celx-colab-v8.zip`.
-5. Execute as células em ordem.
+### Local (smoke)
 
-O notebook usa `/kaggle/input` somente para leitura e `/kaggle/working` para arquivos gerados.
-Ao final, salve uma versão para preservar os outputs.
+Abra `notebooks/01_benchmark.ipynb` neste Mac e execute as células.
+Usa `configs/benchmark_local.yaml` + 4 casos de `baseline.jsonl` (CPU possível, lento).
 
-## Continuação
+### Kaggle (400 casos)
 
-Para continuar uma execução em outra sessão, adicione o ZIP ou JSONL da execução anterior como
-Input e copie o resultado correspondente para `outputs/benchmark_100` antes de rodar
-o modelo. O executor ignora IDs já concluídos.
+1. Neste Mac: `bash scripts/package_project.sh` → `dist/Celx-colab.zip`
+2. Abra `notebooks/01_benchmark.ipynb` no Kaggle (upload do `.ipynb`).
+3. Settings → GPU T4 ou P100 + Internet ligada.
+4. Add Input → dataset com `Celx-colab.zip`.
+5. Execute as células (um modelo por sessão).
+6. Baixe `celx-benchmark-results.zip` e copie para `outputs/benchmark_100/`.
 
+Para continuar outra sessão, adicione o JSONL parcial como Input; o executor ignora IDs já concluídos.
+
+## Treino (Fase 4)
+
+Treino QLoRA / pipeline completo: preferencialmente **RunPod + Jupyter** (`docs/RUNPOD.md`,
+notebook `04_pipeline_completo.ipynb`).
+No Kaggle só faça se houver tempo/GPU suficientes e o dataset SFT já estiver no ZIP.

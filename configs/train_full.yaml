@@ -1,0 +1,62 @@
+# Pipeline completo (notebook 04): CodeXGLUE + SQL(Spider) → SFT → LoRA → eval → export.
+# Mac M1 8GB: limites abaixo. Na nuvem, aumente samples e max_length; use CUDA/QLoRA.
+
+project:
+  seed: 42
+  output_dir: models/qwen3-legacy-doc-lora-full
+
+data:
+  dataset_name: google/code_x_glue_ct_code_to_text
+  codexglue_languages: [python, php, javascript]
+  target_languages: [python, php, javascript, sql]
+  sql_dataset_path: dataset/sql
+  # Por linguagem (CodeXGLUE) e também teto do Spider/SQL.
+  max_train_samples_per_language: 400
+  max_validation_samples_per_language: 50
+  max_test_samples_per_language: 50
+  min_code_chars: 40
+  max_code_chars: 12000
+  normalized_dir: dataset/processed/full
+  curated_dir: dataset/curated
+  sft_dir: dataset/processed/sft_full
+
+model:
+  name: Qwen/Qwen3-1.7B
+  max_length: 512
+  load_in_4bit: false
+  trust_remote_code: false
+
+training:
+  num_train_epochs: 1
+  learning_rate: 0.0002
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 8
+  warmup_ratio: 0.03
+  logging_steps: 5
+  eval_strategy: "no"
+  eval_steps: 200
+  save_steps: 20
+  save_total_limit: 3
+  gradient_checkpointing: true
+  bf16: false
+  fp16: false
+  lora_r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+  report_to: [tensorboard]
+  logging_dir: outputs/training_full/runs
+  metrics_csv: outputs/training_full/metrics.csv
+  min_train_samples: 100
+
+evaluation:
+  max_samples: 12
+  max_new_tokens: 512
+  output_dir: outputs/eval_full
+
+generation:
+  max_new_tokens: 1600
+  temperature: 0.2
+  top_p: 0.9
+  enable_thinking: true
