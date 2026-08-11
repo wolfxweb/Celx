@@ -1,38 +1,72 @@
 # Celx — documentação de software legado
 
-Fine-tuning experimental de um LLM para gerar documentação técnica em português a partir de
-código legado (PHP, Python, JavaScript e SQL).
+Especializar um LLM para analisar código-fonte legado e gerar **documentação técnica** (pt-BR e/ou en) que ajude pessoas desenvolvedoras a entender o funcionamento do sistema e as regras de negócio **sustentadas pelo código**.
 
-O modelo deve explicar o comportamento observável e declarar incertezas — sem inventar regras.
+O modelo explica o comportamento observável e declara incertezas. **Não inventa** requisitos nem regras que o trecho não sustente.
 
-## Estado
+## Objetivo
 
-Projeto **reiniciado**. Snapshot anterior em [`arquivos/`](arquivos/).
+| | |
+|---|---|
+| **Entrada** | Trecho de código (função/método PHP ou JavaScript, ou consulta SQL) |
+| **Saída** | Markdown estruturado: objetivo, parâmetros, retorno, funcionamento, regras identificáveis, pontos não determinados |
+| **Modelo** | `Qwen/Qwen3-1.7B` + adapter LoRA/QLoRA Celx |
+| **Critério** | Fiel ao código; incompleto + incerteza explícita é melhor que alucinação |
 
-Ciclo atual: **Fase 2 — Benchmark** para escolher o modelo-base.
-Plano completo: [`docs/PLANO.md`](docs/PLANO.md).
+## Estado atual
+
+- Treino QLoRA (~300k PHP + JavaScript + SQL) concluído no RunPod.
+- Pacote local: `models/export/qwen3-1.7b-celx/adapter/` (a partir de `models/celx-adapter-local.tgz`).
+- Snapshot do ciclo anterior em [`arquivos/`](arquivos/) (histórico; não editar).
+
+## Formato da documentação
+
+1. Método ou função / Consulta SQL  
+2. Objetivo  
+3. Parâmetros  
+4. Retorno  
+5. Funcionamento  
+6. Regras de negócio identificadas  
+7. Pontos não determinados  
+
+## Bases de dados
+
+| Fonte | Uso | URL |
+|---|---|---|
+| **CodeXGLUE** Code-to-Text (PHP, JavaScript; Python opcional) | Pares código → texto para SFT | https://huggingface.co/datasets/google/code_x_glue_ct_code_to_text |
+| **Spider** | Exemplos SQL | https://huggingface.co/datasets/xlangai/spider |
+| **Modelo base** | Checkpoint a adaptar | https://huggingface.co/Qwen/Qwen3-1.7B |
+| Curadoria Celx | Exemplos revisados (pt-BR / bilingue) | `dataset/curated/` |
+
+Volume típico no treino cheio (sem Python): ~241k PHP + ~58k JS + ~5–7k SQL ≈ **~300k** exemplos.
+
+## Resultado esperado
+
+- Adapter em `models/export/qwen3-1.7b-celx/adapter/`
+- Inferência local via `scripts/document_code.py` (Mac: LoRA/MPS; sem QLoRA 4-bit)
+- Eval estrutural das seções no split de teste
+- Opcional: API OpenAI-compatible (`scripts/start_celx_api.sh`) e Continue no VS Code
 
 ## Estrutura
 
 ```text
 .
 ├── arquivos/      # histórico congelado (não editar)
-├── configs/       # modelo, dados e treinamento
-├── dataset/       # exemplos, benchmark e curadoria
-├── docs/          # plano, escopo, rubrica, decisões
+├── configs/       # treino, curadoria, candidatos de modelo
+├── dataset/       # exemplos, SQL, curadoria, SFT processado
 ├── legacy_doc/    # prompts e config Python
-├── models/        # adapters (gitignored)
-├── notebooks/     # 01–04 (benchmark → pipeline completo)
-├── outputs/       # resultados de execução (gitignored)
-├── scripts/       # CLI: dados, baseline, treino, inferência
+├── models/        # adapters / export (gitignored)
+├── notebooks/     # 01 benchmark → 04 pipeline completo
+├── outputs/       # métricas e eval (gitignored)
+├── scripts/       # CLI: dados, treino, eval, inferência, export
 └── tests/
 ```
 
 ## Requisitos
 
-- Python 3.10+
-- GPU NVIDIA/CUDA para benchmark completo e QLoRA (Kaggle, Colab ou RunPod)
-- Este Mac prepara dados e empacota o projeto; não treina
+- Python 3.10+ (venv do projeto)
+- **Mac (MPS):** inferência e treinos pequenos; não use bitsandbytes/QLoRA 4-bit
+- **GPU NVIDIA (RunPod/Colab):** treino cheio (~300k) com QLoRA
 
 ## Instalação local
 
@@ -44,41 +78,66 @@ python -m pip install -r requirements.txt
 python -m pip install -e .
 ```
 
-## Próximo passo
+## Usar o adapter no Mac
 
-1. Kernel `.venv` → `notebooks/01_benchmark.ipynb` (opcional)
-2. **Pipeline completo** → `notebooks/04_pipeline_completo.ipynb`  
-   (CodeXGLUE + SQL → treino → eval → export)
-3. Alternativas: `03_treino_real.ipynb` (só CodeXGLUE) ou `02` (smoke)
-
-### Usar o modelo no editor
-
-| Editor | Como |
-|---|---|
-| **VS Code** | Extensão **Continue** + Ollama local (`qwen2.5:1.5b-celx`) e/ou API Celx |
-| **Cursor** | `localhost` é bloqueado; use modelos cloud do Cursor, ou VS Code para local |
-| **Terminal** | `document_code.py` com o adapter |
+Se ainda não extraiu o pacote baixado do RunPod:
 
 ```bash
-# App Ollama deve estar aberto
-# API do adapter Celx (para Continue no VS Code):
-bash scripts/start_celx_api.sh
+mkdir -p models/export
+tar -xzf models/celx-adapter-local.tgz -C models/export
+# → models/export/qwen3-1.7b-celx/adapter/
 ```
 
-Config Continue do projeto: `.continue/config.json`  
-- `Ollama Qwen 1.5B Celx` → `qwen2.5:1.5b-celx` @ `http://127.0.0.1:11434`  
-- `Celx Legacy Doc` → `http://127.0.0.1:8000/v1` (com a API acima rodando)
+Inferência (na primeira vez baixa a base `Qwen/Qwen3-1.7B` do Hugging Face):
 
 ```bash
 source .venv/bin/activate
-bash scripts/pipeline_full.sh
-# ou acompanhar treino:
+python scripts/document_code.py \
+  --file dataset/examples/calcula_total.php \
+  --language php \
+  --doc-language pt-BR \
+  --adapter models/export/qwen3-1.7b-celx/adapter \
+  --config configs/train_full.yaml
+```
+
+Inglês: `--doc-language en`.
+
+### Editor / API
+
+| Ferramenta | Como |
+|---|---|
+| **Terminal** | `document_code.py` com o adapter acima |
+| **VS Code + Continue** | API local ou Ollama (ver `.continue/`) |
+| **Cursor** | `localhost` costuma ser bloqueado; use Terminal/VS Code para o adapter local |
+
+```bash
+# API OpenAI-compatible (porta 8000) — Continue / clientes HTTP
+bash scripts/start_celx_api.sh
+```
+
+## Treinar de novo (RunPod)
+
+1. Envie só `notebooks/04_pipeline_completo.ipynb` (cria `/workspace/celx`).
+2. Stages: **A** dados+SFT+treino+eval → **B** (opcional bilingue) → **Final** export → **C** smoke.
+3. Baixe `models/export/celx-adapter-local.tgz` (~29 MB) de volta ao Mac.
+
+Config CUDA: `configs/train_php_js_sql_full.yaml`.
+
+Alternativa local/scripts:
+
+```bash
+source .venv/bin/activate
+bash scripts/pipeline_full.sh configs/train_full.yaml          # amostra (Mac)
+# ou na GPU:
+bash scripts/pipeline_full.sh configs/train_php_js_sql_full.yaml
 python scripts/watch_training.py
 ```
 
-Ver `docs/PLANO.md`.
+## Notebooks
 
-## Modelo e dados previstos
-
-- Candidatos: `Qwen/Qwen3-1.7B` e Ministral 3B (`configs/model_candidates.yaml`)
-- Dataset: CodeXGLUE code-to-text + SQL complementar + curadoria em português
+| Notebook | Função |
+|---|---|
+| `01_benchmark.ipynb` | Seleção / baseline do modelo |
+| `02_treino_qlora.ipynb` | Smoke do pipeline |
+| `03_treino_real.ipynb` | Treino CodeXGLUE → LoRA |
+| `04_pipeline_completo.ipynb` | **End-to-end** (recomendado na nuvem) |
